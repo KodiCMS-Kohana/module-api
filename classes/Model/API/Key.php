@@ -1,4 +1,4 @@
-<?php defined('SYSPATH') or die('No direct script access.');
+<?php namespace KodiCMS\API\Model\API;
 
 /**
  * @package		KodiCMS/API
@@ -8,24 +8,24 @@
  * @copyright  (c) 2012-2014 butschster
  * @license    http://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
  */
-class Model_Api_key extends ORM {
+class Key extends \ORM {
 	
-	protected $_created_column = array(
+	protected $_created_column = [
 		'column' => 'created_on',
 		'format' => 'Y-m-d H:i:s'
-	);
+	];
 	
 	/**
-	 * 
-	 * @param type $description
-	 * @return string
+	 * @param string $description
+	 * @return mixed
+	 * @throws \Kohana_Exception
 	 */
 	public function generate($description = '')
 	{
-		$this->values(array(
+		$this->values([
 			'id' => self::generate_key(),
 			'description' => $description
-		), array('id', 'description'))->create();
+		], ['id', 'description'])->create();
 
 		return $this->id;
 	}
@@ -44,9 +44,9 @@ class Model_Api_key extends ORM {
 			return FALSE;
 		}
 
-		$this->values(array(
+		$this->values([
 			'id' => self::generate_key()
-		), array('id'))->update();
+		], ['id'])->update();
 
 		return $this->id;
 	}
@@ -60,7 +60,7 @@ class Model_Api_key extends ORM {
 	{
 		return $this
 			->reset()
-			->where('id', '=', HTML::chars($key))
+			->where('id', '=', \HTML::chars($key))
 			->find()
 			->loaded();
 	}

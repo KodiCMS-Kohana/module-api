@@ -1,4 +1,8 @@
-<?php defined( 'SYSPATH' ) or die( 'No direct script access.' );
+<?php namespace \KodiCMS\API\Controller\System;
+
+use \KodiCMS\API\HTTP\API\Exception as API_Exception;
+use \KodiCMS\Core\Controller\System\Ajax as Controller_AJAX;
+use \KodiCMS\API\API\Validation\Exception as API_Validation_Exception;
 
 /**
  * @package		KodiCMS/API
@@ -8,7 +12,7 @@
  * @copyright	(c) 2012-2014 butschster
  * @license		http://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
  */
-class Controller_System_API extends Controller_System_Ajax {
+class API extends Controller_AJAX {
 	
 	/**
 	 *
@@ -20,13 +24,13 @@ class Controller_System_API extends Controller_System_Ajax {
 	 * Массив возвращаемых значений, будет преобразован в формат JSON
 	 * @var array 
 	 */
-	public $json = array();
+	public $json = [];
 	
 	/**
 	 *
 	 * @var array 
 	 */
-	public $fields = array();
+	public $fields = [];
 	
 	/**
 	 * Передаваемые параметры.
@@ -34,14 +38,14 @@ class Controller_System_API extends Controller_System_Ajax {
 	 * 
 	 * @var array 
 	 */
-	protected $_params = array();
+	protected $_params = [];
 	
 	/**
 	 * Публичные методы, к которым можно получить доступ без ключа или авторизации
 	 * 
 	 * @var array array('post_action', 'get_action', '...')
 	 */
-	public $public_actions = array();
+	public $public_actions = [];
 
 	/**
 	 * Осуществялть проверку токена для входящих данных
@@ -55,8 +59,8 @@ class Controller_System_API extends Controller_System_Ajax {
 	{
 		parent::before();
 
-		$this->json['code'] = API::NO_ERROR;
-		$this->fields = $this->param('fields', array());
+		$this->json['code'] = \API::NO_ERROR;
+		$this->fields = $this->param('fields', []);
 
 		if (strpos($this->request->headers('content-type'), 'application/json') !== FALSE)
 		{
@@ -70,18 +74,18 @@ class Controller_System_API extends Controller_System_Ajax {
 			$this->request->post($data);
 		}
 	}
-	
+
 	/**
 	 * Получение значения передаваемого параметра
-	 * 
-	 * Если параметр указан как обязательный, то при его отсутсвии на запрос 
+	 *
+	 * Если параметр указан как обязательный, то при его отсутсвии на запрос
 	 * вернется ошибка
-	 * 
-	 * @param string $key Ключ
-	 * @param mixed $default Значение по умолчанию, если параметр отсутсвует
+	 *
+	 * @param $key Ключ
+	 * @param null $default Значение по умолчанию, если параметр отсутсвует
 	 * @param bool $is_required Параметр обязателен для передачи
-	 * @return string
-	 * @throws HTTP_API_Exception
+	 * @return mixed
+	 * @throws HTTP_Exception
 	 */
 	public function param($key, $default = NULL, $is_required = FALSE)
 	{
@@ -89,8 +93,8 @@ class Controller_System_API extends Controller_System_Ajax {
 
 		if ($is_required === TRUE AND empty($param))
 		{
-			throw HTTP_API_Exception::factory(API::ERROR_MISSING_PAPAM, 'Missing required parameter :key', array(
-				':key' => $key));
+			throw API_Exception::factory(\API::ERROR_MISSING_PAPAM, 'Missing required parameter :key', [
+				':key' => $key]);
 		}
 
 		return $param;
@@ -104,24 +108,22 @@ class Controller_System_API extends Controller_System_Ajax {
 	 */
 	public function params(array $new_params = NULL)
 	{
-		$this->_params = Arr::merge($this->request->query(), $this->request->post(), $this->request->param(), $_FILES);
+		$this->_params = \Arr::merge($this->request->query(), $this->request->post(), $this->request->param(), $_FILES);
 
 		if (is_array($new_params))
 		{
-			$this->_params = Arr::merge($this->_params, $new_params);
+			$this->_params = \Arr::merge($this->_params, $new_params);
 		}
 
 		return $this->_params;
 	}
 
 	/**
-	 * 
-	 * @return Response
-	 * @throws HTTP_API_Exception
+	 * @return \Kohana\Core\Response
 	 */
 	public function execute()
 	{
-		$this->_model = ORM::factory('Api_Key');
+		$this->_model = \ORM::factory('Api_Key');
 
 		if ($this->request->action() == 'index' OR $this->request->action() == '')
 		{
@@ -134,16 +136,16 @@ class Controller_System_API extends Controller_System_Ajax {
 		}
 
 		$action = strtolower($action);
-		$is_logged_in = Auth::is_logged_in();
+		$is_logged_in = \Auth::is_logged_in();
 
 		try 
 		{
 			/**
 			 * Если выключено API, запретить доступ не авторизованным пользователям к нему
 			 */
-			if ((Config::get('api', 'mode') == 'no' AND ( !$is_logged_in AND $this->is_backend())))
+			if ((\Config::get('api', 'mode') == 'no' AND ( !$is_logged_in AND $this->is_backend())))
 			{
-				throw new HTTP_Exception_403('Public API is disabled');
+				throw \HTTP_Exception::factory(403, 'Public API is disabled');
 			}
 
 			/**
@@ -154,7 +156,7 @@ class Controller_System_API extends Controller_System_Ajax {
 			{
 				if (!$this->_model->is_valid($this->param('api_key')))
 				{
-					throw new HTTP_Exception_403('API key not valid');
+					throw new \HTTP_Exception::factory(403, 'API key not valid');
 				}
 			}
 
@@ -172,16 +174,16 @@ class Controller_System_API extends Controller_System_Ajax {
 			// If the action doesn't exist, it's a 404
 			if (!method_exists($this, $action))
 			{
-				throw HTTP_API_Exception::factory(API::ERROR_PAGE_NOT_FOUND,
+				throw API_Exception::factory(\API::ERROR_PAGE_NOT_FOUND,
 					'The requested method ":method" was not found on this server.',
-					array(':method' => $action)
+					[':method' => $action]
 				)->request($this->request);
 			}
 
 			// Execute the action itself
 			$this->{$action}();
 		}
-		catch (HTTP_API_Exception $e)
+		catch (API_Exception $e)
 		{
 			$this->json = $e->get_response();
 		}
@@ -189,25 +191,25 @@ class Controller_System_API extends Controller_System_Ajax {
 		{
 			$this->json = $e->get_response();
 		}
-		catch (ORM_Validation_Exception $e)
+		catch (\ORM_Validation_Exception $e)
 		{
-			$this->json = array(
-				'code'		=> API::ERROR_VALIDATION,
+			$this->json = [
+				'code'		=> \API::ERROR_VALIDATION,
 				'message'	=> rawurlencode($e->getMessage()),
 				'response'	=> NULL,
 				'errors'	=> $e->errors('validation')
-			);
+			];
 		}
-		catch (Validation_Exception $e)
+		catch (\Validation_Exception $e)
 		{
-			$this->json = array(
-				'code'		=> API::ERROR_VALIDATION,
+			$this->json = [
+				'code'		=> \API::ERROR_VALIDATION,
 				'message'	=> rawurlencode($e->getMessage()),
 				'response'	=> NULL,
 				'errors'	=> $e->errors('validation')
-			);
+			];
 		}
-		catch (Exception $e)
+		catch (\Exception $e)
 		{
 			$this->json['code'] = $e->getCode();
 			$this->json['line'] = $e->getLine();
@@ -227,7 +229,7 @@ class Controller_System_API extends Controller_System_Ajax {
 	{
 		if ($this->param('debug') !== NULL)
 		{
-			$this->response->body(debug::vars($this->json));
+			$this->response->body(\Debug::vars($this->json));
 			return;
 		}
 
@@ -252,12 +254,12 @@ class Controller_System_API extends Controller_System_Ajax {
 	 */
 	public function json_redirect($uri)
 	{
-		$this->json['redirect'] = URL::backend($uri);
+		$this->json['redirect'] = \URL::backend($uri);
 	}
 	
 	/**
-	 * 
-	 * @param string $uri
+	 * @param $message
+	 * @param array $values
 	 */
 	public function message($message, array $values = NULL)
 	{
@@ -283,10 +285,10 @@ class Controller_System_API extends Controller_System_Ajax {
 	{
 		$token = $this->param('token', NULL, TRUE);
 
-		if (!Security::check($token))
+		if (!\Security::check($token))
 		{
-			Kohana::$log->add(Log::NOTICE, 'Error security token')->write();
-			throw HTTP_API_Exception::factory(API::ERROR_TOKEN, 'Error security token');
+			\Kohana::$log->add(\Log::NOTICE, 'Error security token')->write();
+			throw API_Exception::factory(\API::ERROR_TOKEN, 'Error security token');
 		}
 	}
 	

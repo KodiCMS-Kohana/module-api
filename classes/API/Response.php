@@ -1,4 +1,4 @@
-<?php defined('SYSPATH') or die('No direct script access.');
+<?php namespace KodiCMS\API\API;
 
 /**
  * @package		KodiCMS/API
@@ -7,7 +7,7 @@
  * @copyright  (c) 2012-2014 butschster
  * @license    http://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
  */
-class API_Response {
+class Response {
 	
 	const OBJ = 'object';
 	const ARR = 'array';
@@ -40,7 +40,7 @@ class API_Response {
 	 * 
 	 * @param Response $response
 	 */
-	public function __construct(Response $response) 
+	public function __construct(\Response $response)
 	{
 		$this->_response = $response;
 
@@ -80,7 +80,7 @@ class API_Response {
 	 */
 	public function debug()
 	{
-		echo debug::vars($this->body());
+		echo \Debug::vars($this->body());
 		return $this;
 	}
 	
@@ -113,7 +113,7 @@ class API_Response {
 	 */
 	public function status()
 	{
-		return $this->code() == API::NO_ERROR;
+		return $this->code() == \API::NO_ERROR;
 	}
 	
 	/**
@@ -173,7 +173,7 @@ class API_Response {
 		}
 		else if ($this->_data_type == self::ARR)
 		{
-			return Arr::path($this->_data, $name, $default);
+			return \Arr::path($this->_data, $name, $default);
 		}
 
 		return $this->as_array()->get($name, $default);

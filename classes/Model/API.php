@@ -1,4 +1,7 @@
-<?php defined( 'SYSPATH' ) or die( 'No direct access allowed.' );
+<?php namespace KodiCMS\API\Model;
+
+use Kohana\Database\Model\Database as Model_Database;
+use \KodiCMS\API\HTTP\API\Exception as API_Exception;
 
 /**
  * @package		KodiCMS/API
@@ -8,7 +11,7 @@
  * @copyright  (c) 2012-2014 butschster
  * @license    http://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
  */
-class Model_API extends Model_Database {
+class API extends Model_Database {
 	
 	/**
 	 * Table columns
@@ -20,13 +23,13 @@ class Model_API extends Model_Database {
 	 * Secured table columns
 	 * @var array
 	 */
-	protected $_secured_columns = array();
+	protected $_secured_columns = [];
 	
 	/**
 	 *
 	 * @var array 
 	 */
-	protected $_params = array();
+	protected $_params = [];
 
 	/**
 	 * Table name
@@ -70,19 +73,16 @@ class Model_API extends Model_Database {
 	}
 
 	/**
-	 * 
-	 * @global type $table_name
-	 * @param array $fields
-	 * @param array $related_columns
+	 * @param $fields
 	 * @param array $remove_fields
 	 * @return array
-	 * @throws HTTP_API_Exception
+	 * @throws \HTTP_Exception
 	 */
-	public function filtered_fields($fields, $remove_fields = array())
+	public function filtered_fields($fields, $remove_fields = [])
 	{
 		if (!is_array($fields))
 		{
-			$fields = array($fields);
+			$fields = [$fields];
 		}
 
 		$secured_fields = array_intersect($this->_secured_columns, $fields);
@@ -91,11 +91,11 @@ class Model_API extends Model_Database {
 		$fields = array_diff($fields, $remove_fields);
 
 		// TODO сделать проверку токена, выдаваемого под API
-		if (!empty($secured_fields) AND ! Auth::is_logged_in('login'))
+		if (!empty($secured_fields) AND ! \Auth::is_logged_in('login'))
 		{
-			throw HTTP_API_Exception::factory(API::ERROR_PERMISSIONS, 'You don`t have permissions to access to this fields (:fields).', array(
+			throw API_Exception::factory(\API::ERROR_PERMISSIONS, 'You don`t have permissions to access to this fields (:fields).', [
 				':fields' => implode(', ', $secured_fields)
-			));
+			]);
 		}
 
 		$fields = array_intersect(array_keys($this->_table_columns), $fields);
@@ -107,11 +107,10 @@ class Model_API extends Model_Database {
 
 		return $fields;
 	}
-	
+
 	/**
-	 * 
 	 * @param array $params
-	 * @return \Model_API
+	 * @return $this
 	 */
 	public function set_params(array $params)
 	{
@@ -140,14 +139,13 @@ class Model_API extends Model_Database {
 	}
 
 	/**
-	 * 
-	 * @param string $name
-	 * @param mixed $filter
-	 * @return type
+	 * @param $name
+	 * @param null $default
+	 * @return mixed
 	 */
 	public function get($name, $default = NULL)
 	{
-		return Arr::get($this->_params, $name, $default);
+		return \Arr::get($this->_params, $name, $default);
 	}
 
 	/**
@@ -178,9 +176,9 @@ class Model_API extends Model_Database {
 	 */
 	public function list_columns()
 	{
-		if (Kohana::$caching === TRUE)
+		if (\Kohana::$caching === TRUE)
 		{
-			$cache = Cache::instance();
+			$cache = \Cache::instance();
 			if (($result = $cache->get('table_columns_' . $this->_table_name)) !== NULL)
 			{
 				return $result;

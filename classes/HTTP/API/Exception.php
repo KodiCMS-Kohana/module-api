@@ -1,4 +1,4 @@
-<?php defined( 'SYSPATH' ) or die( 'No direct script access.' );
+<?php namespace KodiCMS\API\HTTP\API;
 
 /**
  * @package		KodiCMS/API
@@ -8,7 +8,7 @@
  * @copyright  (c) 2012-2014 butschster
  * @license    http://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
  */
-class HTTP_API_Exception extends Kohana_HTTP_Exception {
+class Exception extends \HTTP_Exception {
 	
 	/**
      * Generate a Response for all Exceptions without a more specific override
@@ -21,7 +21,7 @@ class HTTP_API_Exception extends Kohana_HTTP_Exception {
     public function get_response()
     {
 		// Lets log the Exception, Just in case it's important!
-		Kohana_Exception::log($this);
+		\Kohana_Exception::log($this);
 
 		$params = array(
 			'code'  => 500,
@@ -29,7 +29,7 @@ class HTTP_API_Exception extends Kohana_HTTP_Exception {
 			'response' => NULL
 		);
 
-		if ($this instanceof HTTP_Exception)
+		if ($this instanceof \HTTP_Exception)
 		{
 			$params['code'] = $this->getCode();
 		}

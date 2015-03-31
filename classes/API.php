@@ -1,4 +1,8 @@
-<?php defined('SYSPATH') or die('No direct script access.');
+<?php namespace KodiCMS\API;
+
+use \KodiCMS\API\API\Response as API_Response;
+use \Kohana\Cache\HTTP\Cache as HTTP_Cache;
+use \KodiCMS\API\HTTP\API\Exception as API_Exception;
 
 /**
  * @package		KodiCMS/API
@@ -19,11 +23,11 @@ class API {
 	
 	protected static function _get_key()
 	{
-		$key = Config::get('api', 'key');
+		$key = \Config::get('api', 'key');
 
 		if ($key === NULL)
 		{
-			throw HTTP_API_Exception::factory(API::ERROR_TOKEN, 'API key not generated. Generate a new key in the site settings.');
+			throw API_Exception::factory(API::ERROR_TOKEN, 'API key not generated. Generate a new key in the site settings.');
 		}
 
 		return $key;
@@ -39,7 +43,7 @@ class API {
 	public static function get($uri, array $params = array(), $cache = FALSE)
 	{
 		$request = static::request($uri, $cache)
-			->method(Request::GET)
+			->method(\Request::GET)
 			->query($params)
 			->query('api_key', self::_get_key())
 			->execute();
@@ -57,7 +61,7 @@ class API {
 	public static function put($uri, array $params = array(), $cache = FALSE)
 	{
 		$request = static::request($uri, $cache)
-			->method(Request::PUT)
+			->method(\Request::PUT)
 			->post($params)
 			->post('api_key', self::_get_key())
 			->execute();
@@ -75,7 +79,7 @@ class API {
 	public static function post($uri, array $params = array(), $cache = FALSE)
 	{
 		$request = static::request($uri, $cache)
-			->method(Request::POST)
+			->method(\Request::POST)
 			->post($params)
 			->post('api_key', self::_get_key())
 			->execute();
@@ -93,7 +97,7 @@ class API {
 	public static function delete($uri, array $params = array(), $cache = FALSE)
 	{
 		$request = static::request($uri, $cache)
-			->method(Request::DELETE)
+			->method(\Request::DELETE)
 			->post($params)
 			->post('api_key', self::_get_key())
 			->execute();
@@ -130,18 +134,18 @@ class API {
 		$params = array();
 		if ($cache !== FALSE)
 		{
-			$params['cache'] = HTTP_Cache::factory(Cache::instance());
+			$params['cache'] = HTTP_Cache::factory(\Cache::instance());
 		}
 
-		return Request::factory($uri, $params);
+		return \Request::factory($uri, $params);
 	}
 	
 	/**
 	 * 
-	 * @param Response $response
-	 * @return \API_Response
+	 * @param \Response $response
+	 * @return API_Response
 	 */
-	protected static function response(Response $response)
+	protected static function response(\Response $response)
 	{
 		return new API_Response($response);
 	}
