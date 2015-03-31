@@ -24,6 +24,6 @@
 		"source":   "https://github.com/KodiCMS/module-api"
 	},
 	"require": {
-		"kodicms/core": "dev-master"
+		"kodicms/core": "dev-psr_4"
 	}
 }
