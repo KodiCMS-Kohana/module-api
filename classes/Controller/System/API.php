@@ -1,7 +1,6 @@
-<?php namespace \KodiCMS\API\Controller\System;
+<?php namespace KodiCMS\API\Controller\System;
 
 use \KodiCMS\API\HTTP\API\Exception as API_Exception;
-use \KodiCMS\Core\Controller\System\Ajax as Controller_AJAX;
 use \KodiCMS\API\API\Validation\Exception as API_Validation_Exception;
 
 /**
@@ -12,7 +11,7 @@ use \KodiCMS\API\API\Validation\Exception as API_Validation_Exception;
  * @copyright	(c) 2012-2014 butschster
  * @license		http://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
  */
-class API extends Controller_AJAX {
+class API extends \KodiCMS\Core\Controller\System\Ajax {
 	
 	/**
 	 *
@@ -120,6 +119,7 @@ class API extends Controller_AJAX {
 
 	/**
 	 * @return \Kohana\Core\Response
+	 * @throws \HTTP_Exception
 	 */
 	public function execute()
 	{
