@@ -1,5 +1,5 @@
 {
-	"name":        "kodicms/api",
+	"name":        "kodicms_kohana/api",
 	"type":        "kodicms-module",
 	"description": "The official KodiCMS core module",
 	"homepage":    "http://www.kodicms.ru/",
